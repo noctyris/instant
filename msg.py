@@ -17,7 +17,13 @@ def receive():
 		c.close()
 
 def send():
+	
 	while 1:
 		content = input("> ")
+		
 
-t1 = threading.Thread()
+receiver = threading.Thread(target=receive)
+sender = threading.Thread(target=send)
+
+receiver.start()
+sender.start()
