@@ -1,5 +1,6 @@
 import threading
 import socket
+import time
 
 def handle_connection(conn):
     while True:
@@ -22,7 +23,12 @@ def receive(port):
 
 def send(ip, port):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((ip, port))
+    while True:
+        try:
+            s.connect((ip, port))
+            break
+        except:
+            time.sleep(1)
 
     while True:
         message = input("> ")
