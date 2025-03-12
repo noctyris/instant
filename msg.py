@@ -1,29 +1,43 @@
 import threading
 import socket
 
+def handle_connection(conn):
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            break
+        print(f'Received: {data.decode()}')
+    conn.close()
 
-PORT = 8000
+def receive(port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(("", port))
+    s.listen(1)
+    print(f'Listening on port {port}')
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(("",PORT))
-s.listen(5)
+    while True:
+        conn, addr = s.accept()
+        print(f'Connected by {addr}')
+        threading.Thread(target=handle_connection, args=(conn,)).start()
 
-print('Connection created on port %s'%PORT)
+def send(ip, port):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((ip, port))
 
-def receive():
-	while 1:
-		c, addr = s.accept()
-		print('Connection received:', addr[0])
-		c.close()
+    while True:
+        message = input("> ")
+        s.sendall(message.encode())
 
-def send():
-	
-	while 1:
-		content = input("> ")
-		
+    s.close()
 
-receiver = threading.Thread(target=receive)
-sender = threading.Thread(target=send)
+# Configuration
+local_port = 62641
+remote_ip = '192.168.1.36'  # Adresse IP du pair
+remote_port = 62641  # Même port pour envoyer et recevoir
 
-receiver.start()
-sender.start()
+# Démarrer les threads
+receiver_thread = threading.Thread(target=receive, args=(local_port,))
+sender_thread = threading.Thread(target=send, args=(remote_ip, remote_port))
+
+receiver_thread.start()
+sender_thread.start()
